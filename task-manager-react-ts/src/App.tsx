@@ -3,6 +3,7 @@ import { useState, type FormEvent } from "react";
 import { TaskCard } from "./features/tasks/components/TaskCard";
 import { mockTasks } from "./features/tasks/utils/mockTasks";
 import type { Task, TaskStatus } from "./features/tasks/types/task";
+import { TaskDashboard } from "./features/tasks/components/TaskDashboard";
 
 function App() {
   const [tasks, setTasks] = useState<Task[]>(mockTasks);
@@ -71,6 +72,7 @@ function App() {
             Organise ton travail, une tâche à la fois.
           </p>
         </header>
+        <TaskDashboard tasks={tasks} />
 
         <form
           onSubmit={handleSubmit}
