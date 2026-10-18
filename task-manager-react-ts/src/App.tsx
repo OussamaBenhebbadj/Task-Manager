@@ -7,6 +7,8 @@ import type { Task, TaskStatus } from "./features/tasks/types/task";
 function App() {
   const [tasks, setTasks] = useState<Task[]>(mockTasks);
   const [title, setTitle] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<TaskStatus | "all">("all");
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -42,6 +44,17 @@ function App() {
     );
   }
 
+  const filteredTasks = tasks.filter((task) => {
+    const matchesSearch = task.title
+      .toLowerCase()
+      .includes(searchQuery.trim().toLowerCase());
+
+    const matchesStatus =
+      statusFilter === "all" || task.status === statusFilter;
+
+    return matchesSearch && matchesStatus;
+  });
+
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-10 sm:px-8">
       <div className="mx-auto max-w-4xl">
@@ -61,7 +74,7 @@ function App() {
 
         <form
           onSubmit={handleSubmit}
-          className="mb-8 flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row"
+          className="mb-6 flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row"
         >
           <label htmlFor="task-title" className="sr-only">
             Titre de la tâche
@@ -84,23 +97,69 @@ function App() {
           </button>
         </form>
 
-        <div className="mb-4 flex items-center justify-between">
+        <section
+          aria-label="Rechercher et filtrer les tâches"
+          className="mb-6 grid grid-cols-1 gap-3 rounded-xl border border-slate-200 bg-white p-4 sm:grid-cols-2"
+        >
+          <div className="flex flex-col gap-2">
+            <label
+              htmlFor="task-search"
+              className="text-sm font-medium text-slate-700"
+            >
+              Rechercher
+            </label>
+
+            <input
+              id="task-search"
+              type="search"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="Rechercher par titre..."
+              className="rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label
+              htmlFor="status-filter"
+              className="text-sm font-medium text-slate-700"
+            >
+              Filtrer par statut
+            </label>
+
+            <select
+              id="status-filter"
+              value={statusFilter}
+              onChange={(event) =>
+                setStatusFilter(event.target.value as TaskStatus | "all")
+              }
+              className="rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+            >
+              <option value="all">Tous les statuts</option>
+              <option value="todo">À faire</option>
+              <option value="doing">En cours</option>
+              <option value="done">Terminées</option>
+            </select>
+          </div>
+        </section>
+
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-lg font-semibold text-slate-900">
             Toutes les tâches
           </h2>
 
           <span className="text-sm text-slate-500">
-            {tasks.length} tâche(s)
+            {filteredTasks.length} résultat(s) sur {tasks.length} tâche(s)
           </span>
         </div>
 
-        {tasks.length === 0 ? (
+        {filteredTasks.length === 0 ? (
           <p className="rounded-xl border border-dashed border-slate-300 p-8 text-center text-slate-500">
-            Aucune tâche pour le moment. Ajoute ta première tâche !
+            Aucune tâche ne correspond à ta recherche.
           </p>
         ) : (
           <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {tasks.map((task) => (
+            {filteredTasks.map((task) => (
               <TaskCard
                 key={task.id}
                 task={task}
