@@ -2,7 +2,7 @@
 import { useState, type FormEvent } from "react";
 import { TaskCard } from "./features/tasks/components/TaskCard";
 import { mockTasks } from "./features/tasks/utils/mockTasks";
-import type { Task } from "./features/tasks/types/task";
+import type { Task, TaskStatus } from "./features/tasks/types/task";
 
 function App() {
   const [tasks, setTasks] = useState<Task[]>(mockTasks);
@@ -26,6 +26,20 @@ function App() {
 
     setTasks((currentTasks) => [newTask, ...currentTasks]);
     setTitle("");
+  }
+
+  function handleStatusChange(taskId: number, status: TaskStatus) {
+    setTasks((currentTasks) =>
+      currentTasks.map((task) =>
+        task.id === taskId ? { ...task, status } : task,
+      ),
+    );
+  }
+
+  function handleDelete(taskId: number) {
+    setTasks((currentTasks) =>
+      currentTasks.filter((task) => task.id !== taskId),
+    );
   }
 
   return (
@@ -87,7 +101,12 @@ function App() {
         ) : (
           <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {tasks.map((task) => (
-              <TaskCard key={task.id} task={task} />
+              <TaskCard
+                key={task.id}
+                task={task}
+                onStatusChange={handleStatusChange}
+                onDelete={handleDelete}
+              />
             ))}
           </section>
         )}
